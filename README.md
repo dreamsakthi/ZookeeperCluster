@@ -1,5 +1,5 @@
-Vagrant - Kafka
-=============
+Vagrant - Zookeeper / Kafka
+===========================
 
 Vagrant configuration to setup a partitioned Apache Kafka installation with clustered Apache Zookeeper.
 
@@ -13,8 +13,7 @@ Each host is a Centos 6.6 64-bit VM provisioned with JDK 8 and Kafka 0.9.0.1.
 Here we will be using the verion of Zookeeper that comes pre-packaged with Kafka. This will be Zookeeper version 3.4.6 for the version of Kafka we use. 
 
 Prerrequisites
--------------------------
-
+--------------
 * Vagrant (tested on 1.9.1)
 * VirtualBox (tested on 5.1.12)
 
