@@ -27,14 +27,14 @@ Kafka is installed on all hosts at ```$HOME/kafka_2.10-0.9.0.1/```
 
 Here is the mapping of VMs to their private IPs:
 
-| Name        | Address    |
-|-------------|------------|
-|zookeeper1   | 10.30.3.2  |
-|zookeeper2   | 10.30.3.3  |
-|zookeeper3   | 10.30.3.4  |
-|broker1      | 10.30.3.30 | 
-|broker2      | 10.30.3.20 |
-|broker3      | 10.30.3.10 |
+| Name        | Address       |
+|-------------|---------------|
+|zookeeper1   | 192.168.33.2  |
+|zookeeper2   | 192.168.33.3  |
+|zookeeper3   | 192.168.33.4  |
+|broker1      | 192.168.33.30 | 
+|broker2      | 192.168.33.20 |
+|broker3      | 192.168.33.10 |
 
 Zookeeper servers bind to port 2181. Kafka brokers bind to port 9092. 
 
@@ -71,19 +71,6 @@ Login to any host with e.g., ```vagrant ssh broker1```. Some scripts have been i
 
 Now anything you type in producer, it will show on the consumer. 
 
-
-#### Teardown
-
-
-To destroy all the VMs
-
-```bash
-vagrant destroy -f
-```
-
-
-##Insights
-
 ### Zookeeper (ZK)
 
 Kafka is using ZK for its coordination, bookkeeping, and configuration. 
@@ -91,29 +78,13 @@ Here are some commands you can run on any of the nodes to see some of the intern
 
 #### Open a ZK shell
 
-```$HOME/kafka_2.10-0.9.0.1/bin/zookeeper-shell.sh 10.30.3.2:2181``` 
-
-(you can use the IP of any of the ZK servers)
-
+```$HOME/kafka_2.10-0.9.0.1/bin/zookeeper-shell.sh 192.168.33.2:2181``` 
 
 Inside the shell we can browse the zNodes similar to a Linux filesystem: 
 
-```bash
-ls /
-[controller, controller_epoch, brokers, zookeeper, admin, isr_change_notification, consumers, config]
-
-ls /brokers/topics
-[t1, t2]
-
-ls /brokers/ids
-[1, 2, 3]
-```
-
-We can see that there are two topics created (t1, t2) and we already know that we have three brokers with ids 1,2,3. 
+We can see that there are two topics created (INFO, ERROR) and we already know that we have three brokers with ids 1,2,3. 
 
 After you have enough fun browsing ZK, type `ctl-C` to exit the shell.
-
-#### Get ZK version
 
 First we need to instal `nc`: 
 
@@ -124,7 +95,7 @@ sudo yum install nc -y
 To get the version of ZK type:
 
 ```bash
-echo status | nc 10.30.3.2 2181
+echo status | nc 192.168.33.2 2181
 ```
 
 You can replace 10.30.3.2 with any ZK IP 10.30.3.<2,3,4> and execute the above command from any node within the cluster. 
@@ -152,14 +123,14 @@ vagrant ssh zookeeper1
 Create a topic 
 
 ```bash
- /vagrant/scripts/create_topic.sh test-one
+ /vagrant/scripts/create_topic.sh INFO
 ```
 
 Send data to the Kafka topic
 
 ```bash
 echo "Yet another line from stdin" | ./kafka_2.10-0.9.0.1/bin/kafka-console-producer.sh \
-   --topic test-one --broker-list 10.30.3.10:9092,10.30.3.20:9092,10.30.3.30:9092
+   --topic test-one --broker-list 192.168.33.10:9092,192.168.33.20:9092,192.168.33.30:9092
 ```
 
 You can then test that the line was added by running the consumer
@@ -189,30 +160,13 @@ Redirecing this output to Kafka creates a basic form of a streaming producer.
 
 ```bash
 vmstat -a 1 -n 100 | ./kafka_2.10-0.9.0.1/bin/kafka-console-producer.sh \
-   --topic test-one --broker-list 10.30.3.10:9092,10.30.3.20:9092,10.30.3.30:9092 &
+   --topic test-one --broker-list 192.168.33.10:9092,192.168.33.20:9092,192.168.33.30:9092 &
 ```
 
 While the producer runs in the background you can start the consumer to see what happens
 
 ```bash
-/vagrant/scripts/consumer.sh test-one
+/vagrant/scripts/consumer.sh INFO
 ```
 
-You should be seeing the output of `vmstat` in the consumer console. 
-
-When you are all done, kill the consumer by `ctl-C`. The producer will terminate by itself after 100 seconds.
-
-
-#### Offsets
-
-The `create_topic.sh` script creates a topic with replication factor 3 and 1 number of partitions. 
-
-Assuming you have completed the `vmstat` example above using topic `test-one`:
-
-```bash
-/vagrant/scripts/get-offset-info.sh test-one
-test-one:0:102
-```
-
-There is one partition (id 0) and the last offset was 102 (from `vmstat`: 100 lines of reports + 2 header lines)
-We asked Kafka for the last offset written so far using `--time -1` (as seen in [get-offset-info.sh](scripts/get-offset-info.sh)). You can change the time to `-2` to get the first offset. 
+Thanks
