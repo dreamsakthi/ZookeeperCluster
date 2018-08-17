@@ -1,5 +1,5 @@
-Eclipse Feature - Vagrant - Zookeeper / Kafka
-===========================
+
+Start Eclipse Feature - Vagrant - Zookeeper / Kafka
 
 Vagrant configuration to setup a partitioned Apache Kafka installation with clustered Apache Zookeeper.
 
